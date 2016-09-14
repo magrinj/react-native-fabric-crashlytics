@@ -28,8 +28,8 @@ function init(smap) {
   }
 
   var originalHandler = global.ErrorUtils.getGlobalHandler();
-  function errorHandler(e) {
-    StackTrace.fromError(e).then((x)=>Crashlytics.recordCustomExceptionName(e.message, e.message, x.map(row=>{
+  function errorHandler(e, isFatal) {
+    StackTrace.fromError(e, {offline: true}).then((x)=>Crashlytics.recordCustomExceptionName(e.message, e.message, x.map(row=>{
       const loc = mapper(row);
       return {
         fileName: loc.source || row.fileName,
@@ -41,7 +41,7 @@ function init(smap) {
     })));
     // And then re-throw the exception with the original handler
     if (originalHandler) {
-      originalHandler(e);
+      originalHandler(e, isFatal);
     }
   }
   global.ErrorUtils.setGlobalHandler(errorHandler);
